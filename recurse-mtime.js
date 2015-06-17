@@ -1,35 +1,55 @@
-var dir = require('node-dir');
+/**
+ * Dependencies
+ */
+
 var fs = require('fs');
+var path = require('path');
 
-path = process.argv[2];
+/**
+ * Options
+ */
 
-var allFiles = [];
+startDir = process.argv[2];
 
-function unique (arr) {
-  var n = {};
-  var r = [];
+/**
+ * Define functions
+ */
 
-  for (var i = 0; i < arr.length; i++) {
-    if (!n[arr[i]]) {
-      n[arr[i]] = true;
-      r.push(this[i]);
-    };
-  };
-  return r;
-};
+// recursive search a la *nix find
 
-function fileYearMonth (file, idx) {
-  fs.stat(file, function (err, stats) {
-    if (err) throw error;
-    allFiles[idx] = {'file': file, 'year': stats['mtime'].getFullYear(), 'month': stats['mtime'].getMonth()};
-  console.log(allFiles[idx]);
+function find(dirFile, cnt) {
+  fs.stat(dirFile, function(err, stats) {
+    if (err) throw err;
+    // if directory, call find again on all files within the directory
+    if (stats.isDirectory()) {
+      fs.readdir(dirFile, function(err, files) {
+        if (err) throw err;
+        for(var i = 0; i < files.length; i++) {
+          cnt++;
+          find(path.join(dirFile, files[i]), cnt); // recurse
+        }
+      });
+    } else if (stats.isFile()) {
+      year = stats['mtime'].getFullYear();
+      month = stats['mtime'].getMonth();
+
+      console.log('file: ' + dirFile);
+      console.log('year: ' + year); 
+      console.log('month: ' + month);
+      console.log('stackCnt: ' + cnt);
+      console.log();
+
+      if (uniqueYears.indexOf(year) === -1) {
+        uniqueYears.push(year);
+      }
+      if (uniqueMonths.indexOf(month) === -1) {
+        uniqueMonths.push(month);
+      }
+    }
   });
-  console.log(unique(allFiles.year));
-};
+}
 
-dir.files(path, function (err, files) {
-  if (err) throw err;
-  for(var i = 0; i < files.length; i++) {
-    fileYearMonth(files[i], i); 
-  };
-});
+var uniqueYears = [];
+var uniqueMonths = [];
+
+find(startDir, 0);
