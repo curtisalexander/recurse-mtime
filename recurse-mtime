@@ -22,6 +22,7 @@ startDir = process.argv[2];
 function find(startDir, cb) {
   var uniqueYears = [];
   var uniqueMonths = [];
+  var uniqueYYMMs = [];
   var fileCnt = 1;
   var asyncRunning = 0;
 
@@ -45,13 +46,18 @@ function find(startDir, cb) {
       } else if (stats.isFile()) {
         fileCnt--;
         year = stats['mtime'].getFullYear();
-        month = stats['mtime'].getMonth();
+        month = ('0' + (stats['mtime'].getMonth()+1)).slice(-2);
+        yymm = year + '-' + month;
 
         console.log('file: ' + dirFile);
         console.log('year: ' + year); 
         console.log('month: ' + month);
         console.log();
+       
 
+        if (uniqueYYMMs.indexOf(yymm) === -1) {
+          uniqueYYMMs.push(yymm);
+        }
         if (uniqueYears.indexOf(year) === -1) {
           uniqueYears.push(year);
         }
@@ -62,22 +68,25 @@ function find(startDir, cb) {
         fileCnt--;
       }
       if (fileCnt === 0 && asyncRunning === 0) {
-        cb(uniqueYears, uniqueMonths);
+        cb(uniqueYears.sort(), uniqueMonths.sort(), uniqueYYMMs.sort());
       }
     });
   }
   dirOrFile(startDir);
 }
 
-function uniques(uniqueYears, uniqueMonths) {
-  console.log('Unique years...');
-  for (var i = 0; i < uniqueYears.length; i++) {
-    console.log(uniqueYears[i]);
+function printUniques(arr, label) {
+  console.log('Unique ' + label + '...');
+  for (var i = 0; i < arr.length; i++) {
+    console.log(arr[i]);
   }
-  console.log('Unique months...');
-  for (var j = 0; j < uniqueMonths.length; j++) {
-    console.log(uniqueMonths[j]);
-  }
+  console.log();
+}
+
+function uniques(uniqueYears, uniqueMonths, uniqueYYMMs) {
+  printUniques(uniqueYears, 'years');
+  printUniques(uniqueMonths, 'months');
+  printUniques(uniqueYYMMs, 'YYMMs');
 }
 
 find(startDir, uniques);
