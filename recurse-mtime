@@ -19,39 +19,65 @@ startDir = process.argv[2];
 
 // recursive search a la *nix find
 
-function find(dirFile, cnt) {
-  fs.stat(dirFile, function(err, stats) {
-    if (err) throw err;
-    // if directory, call find again on all files within the directory
-    if (stats.isDirectory()) {
-      fs.readdir(dirFile, function(err, files) {
-        if (err) throw err;
-        for(var i = 0; i < files.length; i++) {
-          cnt++;
-          find(path.join(dirFile, files[i]), cnt); // recurse
+function find(startDir, cb) {
+  var uniqueYears = [];
+  var uniqueMonths = [];
+  var fileCnt = 1;
+  var asyncRunning = 0;
+
+  function dirOrFile (dirFile) {
+    // async function
+    fs.stat(dirFile, function(err, stats) {
+      if (err) throw err;
+      // if directory, call find again on all files within the directory
+      if (stats.isDirectory()) {
+        fileCnt--;
+        asyncRunning++;
+        // another async function
+        fs.readdir(dirFile, function(err, files) {
+          asyncRunning--;
+          if (err) throw err;
+          fileCnt += files.length;
+          for(var i = 0; i < files.length; i++) {
+            dirOrFile(path.join(dirFile, files[i])); // recurse
+          }
+        });
+      } else if (stats.isFile()) {
+        fileCnt--;
+        year = stats['mtime'].getFullYear();
+        month = stats['mtime'].getMonth();
+
+        console.log('file: ' + dirFile);
+        console.log('year: ' + year); 
+        console.log('month: ' + month);
+        console.log();
+
+        if (uniqueYears.indexOf(year) === -1) {
+          uniqueYears.push(year);
         }
-      });
-    } else if (stats.isFile()) {
-      year = stats['mtime'].getFullYear();
-      month = stats['mtime'].getMonth();
-
-      console.log('file: ' + dirFile);
-      console.log('year: ' + year); 
-      console.log('month: ' + month);
-      console.log('stackCnt: ' + cnt);
-      console.log();
-
-      if (uniqueYears.indexOf(year) === -1) {
-        uniqueYears.push(year);
+        if (uniqueMonths.indexOf(month) === -1) {
+          uniqueMonths.push(month);
+        }
+      } else {
+        fileCnt--;
       }
-      if (uniqueMonths.indexOf(month) === -1) {
-        uniqueMonths.push(month);
+      if (fileCnt === 0 && asyncRunning === 0) {
+        cb(uniqueYears, uniqueMonths);
       }
-    }
-  });
+    });
+  }
+  dirOrFile(startDir);
 }
 
-var uniqueYears = [];
-var uniqueMonths = [];
+function uniques(uniqueYears, uniqueMonths) {
+  console.log('Unique years...');
+  for (var i = 0; i < uniqueYears.length; i++) {
+    console.log(uniqueYears[i]);
+  }
+  console.log('Unique months...');
+  for (var j = 0; j < uniqueMonths.length; j++) {
+    console.log(uniqueMonths[j]);
+  }
+}
 
-find(startDir, 0);
+find(startDir, uniques);
