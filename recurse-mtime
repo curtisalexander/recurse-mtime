@@ -23,6 +23,7 @@ function find(startDir, cb) {
   var uniqueYears = [];
   var uniqueMonths = [];
   var uniqueYYMMs = [];
+  var uniqueYYMMsObj = {};
   var fileCnt = 1;
   var asyncRunning = 0;
 
@@ -53,8 +54,13 @@ function find(startDir, cb) {
         console.log('year: ' + year); 
         console.log('month: ' + month);
         console.log();
-       
 
+        if (!(year in uniqueYYMMsObj)) {
+          // object with 'year' property equal to
+          // an array containing the month
+          // uniqueYYMMsObj = {year: [month]};
+          // console.log('hahaha ' + uniqueYYMMsObj);
+        }
         if (uniqueYYMMs.indexOf(yymm) === -1) {
           uniqueYYMMs.push(yymm);
         }
