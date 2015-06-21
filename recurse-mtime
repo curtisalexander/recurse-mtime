@@ -55,18 +55,32 @@ function find(startDir, cb) {
         console.log('month: ' + month);
         console.log();
 
-      
-        if (!(year in uniqueYYMMsObj)) {
-          uniqueYYMMsObj.push({'year': year, 'month': [month]});
+        // if value of year does not exist for the key 'year'
+        if (!(uniqueYYMMsObj.some(function(uniqueYYMMsObj) { return hasValue(uniqueYYMMsObj, 'year', year); }))) {
+          uniqueYYMMsObj.push({'year': year, 'months': [month]});   
         } else {
-          
+          var yearIndex = -1;
+          for (var j = 0; j < uniqueYYMMsObj.length; j++) {
+            if (uniqueYYMMsObj[j]['year'] === year) {
+              yearIndex = j;
+              break;
+            }
+          }
+          if (yearIndex !== -1) {
+           // uniqueYYMMsObj[yearIndex]['months'].push(month);
+            var monthIndex = -1;
+            for (var k = 0; k < uniqueYYMMsObj[yearIndex]['months'].length; k++) {
+              if (uniqueYYMMsObj[yearIndex]['months'][k] === month) {
+                monthIndex = k;
+                break;
+              }
+            }
+            if (monthIndex === -1) {
+              uniqueYYMMsObj[yearIndex]['months'].push(month);
+            }
+          }
         }
-        //if (!(year in uniqueYYMMsObj)) {
-          // object with 'year' property equal to
-          // an array containing the month
-          // uniqueYYMMsObj = {year: [month]};
-          // console.log('hahaha ' + uniqueYYMMsObj);
-        //}
+
         if (uniqueYYMMs.indexOf(yymm) === -1) {
           uniqueYYMMs.push(yymm);
         }
@@ -80,11 +94,24 @@ function find(startDir, cb) {
         fileCnt--;
       }
       if (fileCnt === 0 && asyncRunning === 0) {
-        cb(uniqueYears.sort(), uniqueMonths.sort(), uniqueYYMMs.sort(), uniqueYYMMsObj.sort());
+        // sort
+        uniqueYears.sort();
+        uniqueMonths.sort();
+        uniqueYYMMs.sort();
+        uniqueYYMMsObj.sort();
+        for (var l = 0; l < uniqueYYMMsObj.length; l++) {
+          uniqueYYMMsObj[l]['months'].sort();
+        }
+        cb(uniqueYears, uniqueMonths, uniqueYYMMs, uniqueYYMMsObj);
       }
     });
   }
   dirOrFile(startDir);
+}
+
+// for array.some method
+function hasValue(obj, key, value) {
+  return obj.hasOwnProperty(key) && obj[key] === value;
 }
 
 function printUniques(arr, label) {
