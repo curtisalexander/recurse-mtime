@@ -56,29 +56,28 @@ function find(startDir, cb) {
         console.log();
 
         // if value of year does not exist for the key 'year'
-        if (!(uniqueYYMMsObj.some(function(uniqueYYMMsObj) { return hasValue(uniqueYYMMsObj, 'year', year); }))) {
-          uniqueYYMMsObj.push({'year': year, 'months': [month]});   
-        } else {
-          var yearIndex = -1;
-          for (var j = 0; j < uniqueYYMMsObj.length; j++) {
-            if (uniqueYYMMsObj[j]['year'] === year) {
-              yearIndex = j;
+        var yearIndex = -1;
+        for (var j = 0; j < uniqueYYMMsObj.length; j++) {
+          if (uniqueYYMMsObj[j]['year'] === year) {
+            yearIndex = j;
+            break;
+          }
+        }
+        // if the year already exists
+        if (yearIndex !== -1) {
+          // if value of month does not exist for the key 'months'
+          var monthIndex = -1;
+          for (var k = 0; k < uniqueYYMMsObj[yearIndex]['months'].length; k++) {
+            if (uniqueYYMMsObj[yearIndex]['months'][k] === month) {
+              monthIndex = k;
               break;
             }
+          } 
+          if (monthIndex === -1) {
+            uniqueYYMMsObj[yearIndex]['months'].push(month);
           }
-          if (yearIndex !== -1) {
-           // uniqueYYMMsObj[yearIndex]['months'].push(month);
-            var monthIndex = -1;
-            for (var k = 0; k < uniqueYYMMsObj[yearIndex]['months'].length; k++) {
-              if (uniqueYYMMsObj[yearIndex]['months'][k] === month) {
-                monthIndex = k;
-                break;
-              }
-            }
-            if (monthIndex === -1) {
-              uniqueYYMMsObj[yearIndex]['months'].push(month);
-            }
-          }
+        } else {
+          uniqueYYMMsObj.push({'year': year, 'months': [month]});
         }
 
         if (uniqueYYMMs.indexOf(yymm) === -1) {
