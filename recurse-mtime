@@ -20,10 +20,7 @@ startDir = process.argv[2];
 // recursive search a la *nix find
 
 function find(startDir, cb) {
-  var uniqueYears = [];
-  var uniqueMonths = [];
-  var uniqueYYMMs = [];
-  var uniqueYYMMsObj = [];
+  var uniqueYYMM = [];
   var fileCnt = 1;
   var asyncRunning = 0;
 
@@ -57,8 +54,8 @@ function find(startDir, cb) {
 
         // if value of year does not exist for the key 'year'
         var yearIndex = -1;
-        for (var j = 0; j < uniqueYYMMsObj.length; j++) {
-          if (uniqueYYMMsObj[j]['year'] === year) {
+        for (var j = 0; j < uniqueYYMM.length; j++) {
+          if (uniqueYYMM[j]['year'] === year) {
             yearIndex = j;
             break;
           }
@@ -67,50 +64,33 @@ function find(startDir, cb) {
         if (yearIndex !== -1) {
           // if value of month does not exist for the key 'months'
           var monthIndex = -1;
-          for (var k = 0; k < uniqueYYMMsObj[yearIndex]['months'].length; k++) {
-            if (uniqueYYMMsObj[yearIndex]['months'][k] === month) {
+          for (var k = 0; k < uniqueYYMM[yearIndex]['months'].length; k++) {
+            if (uniqueYYMM[yearIndex]['months'][k] === month) {
               monthIndex = k;
               break;
             }
           } 
           if (monthIndex === -1) {
-            uniqueYYMMsObj[yearIndex]['months'].push(month);
+            uniqueYYMM[yearIndex]['months'].push(month);
           }
         } else {
-          uniqueYYMMsObj.push({'year': year, 'months': [month]});
+          uniqueYYMM.push({'year': year, 'months': [month]});
         }
 
-        if (uniqueYYMMs.indexOf(yymm) === -1) {
-          uniqueYYMMs.push(yymm);
-        }
-        if (uniqueYears.indexOf(year) === -1) {
-          uniqueYears.push(year);
-        }
-        if (uniqueMonths.indexOf(month) === -1) {
-          uniqueMonths.push(month);
-        }
       } else {
         fileCnt--;
       }
       if (fileCnt === 0 && asyncRunning === 0) {
         // sort
-        uniqueYears.sort();
-        uniqueMonths.sort();
-        uniqueYYMMs.sort();
-        uniqueYYMMsObj.sort();
-        for (var l = 0; l < uniqueYYMMsObj.length; l++) {
-          uniqueYYMMsObj[l]['months'].sort();
+        uniqueYYMM.sort();
+        for (var l = 0; l < uniqueYYMM.length; l++) {
+          uniqueYYMM[l]['months'].sort();
         }
-        cb(uniqueYears, uniqueMonths, uniqueYYMMs, uniqueYYMMsObj);
+        cb(uniqueYYMM);
       }
     });
   }
   dirOrFile(startDir);
-}
-
-// for array.some method
-function hasValue(obj, key, value) {
-  return obj.hasOwnProperty(key) && obj[key] === value;
 }
 
 function printUniques(arr, label) {
@@ -121,11 +101,8 @@ function printUniques(arr, label) {
   console.log();
 }
 
-function uniques(uniqueYears, uniqueMonths, uniqueYYMMs, uniqueYYMMsObj) {
-  printUniques(uniqueYears, 'years');
-  printUniques(uniqueMonths, 'months');
-  printUniques(uniqueYYMMs, 'YYMMs');
-  printUniques(uniqueYYMMsObj, 'YYMMs');
+function uniques(uniqueYYMM) {
+  printUniques(uniqueYYMM, 'YYMM');
 }
 
 find(startDir, uniques);
