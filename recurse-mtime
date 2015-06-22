@@ -105,4 +105,8 @@ function uniques(uniqueYYMM) {
   printUniques(uniqueYYMM, 'YYMM');
 }
 
+function mkdir(path) {
+  // next
+}
+
 find(startDir, uniques);
